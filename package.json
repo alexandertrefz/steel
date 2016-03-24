@@ -1,0 +1,16 @@
+{
+  "name": "steel",
+  "version": "0.0.1",
+  "main": "",
+  "scripts": {},
+  "author": "Alexander Trefz",
+  "license": "",
+  "devDependencies": {
+    "rollup": "^0.25.5",
+    "rollup-plugin-typescript": "^0.6.0",
+    "typescript": "^1.8.9"
+  },
+  "dependencies": {},
+  "keywords": [],
+  "description": ""
+}
