@@ -1,9 +1,9 @@
-import EventMachine from './EventMachine'
-import Model from './Model'
-import View from './View'
-import Controller from './Controller'
-import Component from './Component'
-import Collection from './Collection'
+import { EventMachine } from './EventMachine'
+import { Model } from './Model'
+import { View } from './View'
+import { Controller } from './Controller'
+import { Component } from './Component'
+import { Collection } from './Collection'
 
 let pubSubMachine = new EventMachine()
 

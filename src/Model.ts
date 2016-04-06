@@ -1,45 +1,60 @@
 /// <reference path="../typings/main.d.ts" />
-import EventMachine from './EventMachine'
-import Component from './Component'
 
-export default class Model extends EventMachine {
-	_data:any
-	component:Component
+import { EventMachine } from './EventMachine'
+import { Component } from './Component'
 
-	constructor(options:any = {}, component:Component) {
+export class Model extends EventMachine {
+	private _data: any
+	public component: Component
+
+	constructor(options: any = {}, component: Component) {
 		super()
 
 		this.component = component
 
 		this._data = {}
+
+		let propertyFilters = this._getPropertyFilters(options)
+		this.on('beforeSet', (e, key, value) => {
+			if (!~propertyFilters.indexOf(key)) {
+				e.cancel()
+			}
+		})
+
 		this._setDefaultData(options)
 		this.initialize(options)
 	}
 
-	initialize(options:any) {
-
+	public initialize(options: any): void {
+		// Fix TSLint by providing a comment :)
 	}
 
-	_setDefaultData(options) {
-
+	protected _getPropertyFilters(options: any): Array<string> {
+		return []
 	}
 
-	setMany(object:any) {
+	protected _setDefaultData(options: any): void {
+		this.setMany(options)
+	}
+
+	public setMany(object: any): void {
 		for (let key in object) {
-			this.set(key, object[key])
+			if (object.hasOwnProperty(key)) {
+				this.set(key, object[key])
+			}
 		}
 	}
 
-	_setDefault(e:hook.IEvent, key:string, value:any) {
+	private _setDefault(e: hook.IEvent, key: string, value: any): void {
 		this._data[key] = value
 	}
 
-	set(key:string, value:any):Model {
-		this.provideHook("set", this._setDefault, [key, value])
+	public set(key: string, value: any): Model {
+		this.provideHook('set', this._setDefault, [key, value])
 		return this
 	}
 
-	get(key:string):any {
+	public get(key: string): any {
 		return this._data[key]
 	}
 }

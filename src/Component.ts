@@ -1,20 +1,20 @@
-import Collection from './Collection'
-import EventMachine from './EventMachine'
-import Model from './Model'
-import View from './View'
-import Controller from './Controller'
+import { Collection } from './Collection'
+import { EventMachine } from './EventMachine'
+import { Model } from './Model'
+import { View } from './View'
+import { Controller } from './Controller'
 
-export default class Component extends EventMachine {
-	parent:Component
-	model:Model
-	view:View
-	controller:Controller
-	children:Collection<Component>
+export class Component extends EventMachine {
+	public parent: Component
+	public model: Model
+	public view: View
+	public controller: Controller
+	public children: Collection<Component>
 
-	isInvalid:boolean
-	_isRenderInProgress:boolean
+	public isInvalid: boolean
+	private _isRenderInProgress: boolean
 
-	constructor(options:any = {}) {
+	constructor(options: any = {}) {
 		super()
 
 		this.children = new Collection<Component>()
@@ -34,34 +34,34 @@ export default class Component extends EventMachine {
 		this.initialize(options)
 	}
 
-	initialize(options:any) {
+	public initialize(options: any): void {
 		this.model = new Model({}, this)
 		this.view = new View({}, this.model, this)
 		this.controller = new Controller({}, this)
 	}
 
-	setMany(object:any):Component {
+	public setMany(object: any): Component {
 		this.model.setMany(object)
 		return this
 	}
 
-	set(key:string, value:any):Component {
+	public set(key: string, value: any): Component {
 		this.model.set(key, value)
 		return this
 	}
 
-	get(key:string):any {
+	public get(key: string): any {
 		return this.model.get(key)
 	}
 
-	invalidate():Component {
+	public invalidate(): Component {
 		this.isInvalid = true
 		this.trigger('invalidation')
 
 		return this
 	}
 
-	render(options:any = {}):Component {
+	public render(options: any = {}): Component {
 		let forceRenderComponents
 		this._isRenderInProgress = true
 
@@ -86,7 +86,7 @@ export default class Component extends EventMachine {
 		return this
 	}
 
-	dispose():void {
+	public dispose(): void {
 		// TODO: Dispose View
 		// TODO: Dispose Model
 		// TODO: Dispose Controller

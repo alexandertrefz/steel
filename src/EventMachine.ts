@@ -1,12 +1,12 @@
 /// <reference path="../typings/main.d.ts" />
 
-export default class EventMachine {
-	parent:EventMachine
-	_handle:hook.Handle
+export class EventMachine {
+	public parent: EventMachine
+	private _handle: hook.Handle
 
-	static _checkEvent(event:string | hook.IEvent):hook.Event {
-		let eventObj:hook.Event
-		if (typeof event === "string" || !(event instanceof hook.Event)) {
+	private static _checkEvent(event: string | hook.IEvent): hook.Event {
+		let eventObj: hook.Event
+		if (typeof event === 'string' || !(event instanceof hook.Event)) {
 			eventObj = new hook.Event(event)
 		} else {
 			eventObj = event
@@ -15,7 +15,7 @@ export default class EventMachine {
 		return eventObj
 	}
 
-	_getCommandHandlers() {
+	protected _getCommandHandlers(): any {
 		return {}
 	}
 
@@ -24,11 +24,13 @@ export default class EventMachine {
 
 		let commandHandlers = this._getCommandHandlers()
 		for (let command in commandHandlers) {
-			this.onCommand(command, this[commandHandlers[command]])
+			if (commandHandlers.hasOwnProperty(command)) {
+				this.onCommand(command, this[commandHandlers[command]])
+			}
 		}
 	}
 
-	trigger(event: string | hook.IEvent, data?):EventMachine {
+	public trigger(event: string | hook.IEvent, data?: any): EventMachine {
 		let eventObj = EventMachine._checkEvent(event)
 		this._handle.triggerHandlers(this, eventObj, data)
 
@@ -39,13 +41,15 @@ export default class EventMachine {
 		return this
 	}
 
-	on(event, handler:(event:hook.IEvent, ...args: Array<any>) => void):EventMachine {
+	public on(event: string | hook.Event, handler: (event: hook.IEvent, ...args: Array<any>) => void): EventMachine {
 		let key, value
 
-		if (typeof event === "object" && event.eventName == null) {
+		if (typeof event === 'object' && event.eventName == null) {
 			for (key in event) {
-				value = event[key]
-				this.on(key, value)
+				if (event.hasOwnProperty(key)) {
+					value = event[key]
+					this.on(key, value)
+				}
 			}
 
 			return this
@@ -57,28 +61,30 @@ export default class EventMachine {
 		return this
 	}
 
-	off(event?: string | hook.IEvent, handler?:Function):EventMachine {
+	public off(event?: string | hook.IEvent, handler?: Function): EventMachine {
 		let eventObj = EventMachine._checkEvent(event)
 		this._handle.removeHandler(eventObj, handler)
 
 		return this
 	}
 
-	sendCommand(event:string | hook.IEvent, data?):EventMachine {
-		//TODO: Output to console whenever an event gets triggered with no listeners
+	public sendCommand(event: string | hook.IEvent, data?: any): EventMachine {
+		// TODO: Output to console whenever an event gets triggered with no listeners
 		let eventObj = EventMachine._checkEvent(event)
 		eventObj.eventName = 'command.' + eventObj.eventName
 		this.trigger(eventObj, data)
 		return this
 	}
 
-	onCommand(event, handler:(event:hook.IEvent, ...args: Array<any>) => void):EventMachine {
+	public onCommand(event: string | hook.IEvent, handler: (event: hook.IEvent, ...args: Array<any>) => void): EventMachine {
 		let key, value
 
 		if (typeof event === 'object' && event.eventName == null) {
 			for (key in event) {
-				value = event[key]
-				this.onCommand(key, value)
+				if (event.hasOwnProperty(key)) {
+					value = event[key]
+					this.onCommand(key, value)
+				}
 			}
 
 			return this
@@ -91,7 +97,7 @@ export default class EventMachine {
 		return this
 	}
 
-	offCommand(event: string | hook.IEvent, handler):EventMachine {
+	public offCommand(event: string | hook.IEvent, handler: Function): EventMachine {
 		let eventObj = EventMachine._checkEvent(event)
 		eventObj.eventName = 'command.' + eventObj.eventName
 		this._handle.removeHandler(eventObj, handler)
@@ -99,7 +105,7 @@ export default class EventMachine {
 		return this
 	}
 
-	provideHook(eventName:string, defaultHandler, data?):EventMachine {
+	public provideHook(eventName: string, defaultHandler: Function, data?: any): EventMachine {
 		let afterEvent, beforeEvent, capitalizedEventName, event
 
 		if (data == null) {
@@ -107,7 +113,7 @@ export default class EventMachine {
 		}
 
 		capitalizedEventName = eventName[0].toUpperCase() + eventName.slice(1)
-		beforeEvent = new hook.Event("before" + capitalizedEventName)
+		beforeEvent = new hook.Event('before' + capitalizedEventName)
 
 		this.trigger(beforeEvent, data)
 
@@ -126,7 +132,7 @@ export default class EventMachine {
 		// event might have been changed by handlers
 		if (!event.isCancelled) {
 			afterEvent = Object.assign({}, event)
-			afterEvent.eventName = "after" + capitalizedEventName
+			afterEvent.eventName = 'after' + capitalizedEventName
 			this.trigger(afterEvent, afterEvent.data)
 		}
 

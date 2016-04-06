@@ -1,10 +1,10 @@
-import EventMachine from './EventMachine'
-import Component from './Component'
+import { EventMachine } from './EventMachine'
+import { Component } from './Component'
 
-export default class Controller extends EventMachine {
-	component:Component
+export class Controller extends EventMachine {
+	public component: Component
 
-	constructor(options: any = {}, component:Component) {
+	constructor(options: any = {}, component: Component) {
 		super()
 
 		this.component = component
@@ -12,7 +12,7 @@ export default class Controller extends EventMachine {
 		this.initialize(options)
 	}
 
-	initialize(options:any) {
-
+	public initialize(options: any): void {
+		// Fix TSLint by providing a comment :)
 	}
 }

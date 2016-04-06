@@ -1,30 +1,32 @@
-import EventMachine from './EventMachine'
-import Component from './Component'
-import Model from './Model'
-import Collection from './Collection'
+import { EventMachine } from './EventMachine'
+import { Component } from './Component'
+import { Model } from './Model'
+import { Collection } from './Collection'
 
-export default class View extends EventMachine {
-	element:HTMLElement
-	childContainer:HTMLElement
-	components:Collection<Component>
-	component:Component
-	model:Model
+export class View extends EventMachine {
+	public element: HTMLElement
+	public childContainer: HTMLElement
+	public components: Collection<Component>
+	public component: Component
+	public model: Model
 
-	_handleClasses(classes) {
-		if (typeof classes === 'string') {
+	private _handleClasses(classes: string): void {
+		let classArray: Array<string>
+
+		if (classes == null) {
+			classArray = []
+		} else {
 			if (~classes.indexOf(' ')) {
-				classes = classes.split(' ')
+				classArray = classes.split(' ')
 			} else {
-				classes = [classes]
+				classArray = [classes]
 			}
-		} else if (classes == null) {
-			classes = []
 		}
 
-		this.element.classList.add(...classes)
+		this.element.classList.add(...classArray)
 	}
 
-	constructor(options:any = {}, model:Model, component:Component) {
+	constructor(options: any = {}, model: Model, component: Component) {
 		super()
 
 		options = Object.assign({}, options)
@@ -40,8 +42,8 @@ export default class View extends EventMachine {
 		this.childContainer = this._createChildContainer()
 
 		this.components = new Collection<Component>()
-		this.components.on('add', (e, component, index) => {
-			this.element.appendChild(component.view.element)
+		this.components.on('add', (e, newComponent, index) => {
+			this.element.appendChild(newComponent.view.element)
 		})
 
 		this.initialize(options)
@@ -49,23 +51,27 @@ export default class View extends EventMachine {
 		this.render()
 	}
 
-	initialize(options:any):void {
-
+	public initialize(options: any): void {
+		// Fix TSLint by providing a comment :)
 	}
 
-	_createElement():HTMLElement {
+	protected _getCommandHandlers(): any {
+		return {}
+	}
+
+	protected _createElement(): HTMLElement {
 		return document.createElement('div')
 	}
 
-	_createChildContainer() {
+	protected _createChildContainer(): HTMLElement {
 		return this.element
 	}
 
-	getComponentName():string {
+	public getComponentName(): string {
 		return 'GenericView'
 	}
 
-	hasInvalidComponents():boolean {
+	public hasInvalidComponents(): boolean {
 		let result = false
 
 		for (let component of this.components.items) {
@@ -78,7 +84,7 @@ export default class View extends EventMachine {
 		return result
 	}
 
-	renderComponents(options:any = {}):View {
+	public renderComponents(options: any = {}): View {
 		for (let component of this.components.items) {
 			component.render({ force: options.force })
 		}
@@ -86,7 +92,7 @@ export default class View extends EventMachine {
 		return this
 	}
 
-	render():View {
+	public render(): View {
 		this.renderComponents()
 
 		return this
