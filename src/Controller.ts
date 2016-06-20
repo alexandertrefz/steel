@@ -1,7 +1,7 @@
-import { EventMachine } from './EventMachine'
-import { Component } from './Component'
+import EventMachine from './EventMachine'
+import Component from './Component'
 
-export class Controller extends EventMachine {
+export default class Controller extends EventMachine {
 	public component: Component
 
 	constructor(options: any = {}, component: Component) {

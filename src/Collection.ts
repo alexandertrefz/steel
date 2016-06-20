@@ -1,9 +1,9 @@
 /// <reference path="../typings/main.d.ts" />
 
-import { EventMachine } from './EventMachine'
+import EventMachine from './EventMachine'
 
 // TODO: Implement _rangeDifference for removals
-export class Collection<T> extends EventMachine {
+export default class Collection<T> extends EventMachine {
 	public items: Array<T>
 	public count: number
 	private _rangeDifference: Array<T>

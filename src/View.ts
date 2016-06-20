@@ -1,9 +1,9 @@
-import { EventMachine } from './EventMachine'
-import { Component } from './Component'
-import { Model } from './Model'
-import { Collection } from './Collection'
+import EventMachine from './EventMachine'
+import Component from './Component'
+import Model from './Model'
+import Collection from './Collection'
 
-export class View extends EventMachine {
+export default class View extends EventMachine {
 	public element: HTMLElement
 	public childContainer: HTMLElement
 	public components: Collection<Component>
@@ -59,7 +59,7 @@ export class View extends EventMachine {
 		this.render()
 	}
 
-	public initialize(options: any): void {
+	protected initialize(options: any): void {
 		// Fix TSLint by providing a comment :)
 	}
 

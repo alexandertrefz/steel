@@ -1,10 +1,10 @@
-import { Collection } from './Collection'
-import { EventMachine } from './EventMachine'
-import { Model } from './Model'
-import { View } from './View'
-import { Controller } from './Controller'
+import Collection from './Collection'
+import EventMachine from './EventMachine'
+import Model from './Model'
+import View from './View'
+import Controller from './Controller'
 
-export class Component extends EventMachine {
+export default class Component extends EventMachine {
 	public parent: Component
 	public model: Model
 	public view: View

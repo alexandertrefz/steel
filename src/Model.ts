@@ -1,9 +1,9 @@
 /// <reference path="../typings/main.d.ts" />
 
-import { EventMachine } from './EventMachine'
-import { Component } from './Component'
+import EventMachine from './EventMachine'
+import Component from './Component'
 
-export class Model extends EventMachine {
+export default class Model extends EventMachine {
 	private _data: any
 	public component: Component
 

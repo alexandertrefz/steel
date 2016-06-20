@@ -1,6 +1,6 @@
 /// <reference path="../typings/main.d.ts" />
 
-export class EventMachine {
+export default class EventMachine {
 	public parent: EventMachine
 	private _handle: hook.Handle
 
