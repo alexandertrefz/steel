@@ -6,9 +6,9 @@
   "author": "Alexander Trefz",
   "license": "",
   "devDependencies": {
-    "rollup": "^0.25.5",
-    "rollup-plugin-typescript": "^0.6.0",
-    "typescript": "^1.8.9"
+	"rollup": "^0.32.0",
+	"rollup-plugin-typescript": "^0.7.6",
+    "typescript": "^1.8.10"
   },
   "dependencies": {},
   "keywords": [],
