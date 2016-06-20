@@ -10,18 +10,26 @@ export class View extends EventMachine {
 	public component: Component
 	public model: Model
 
-	private _handleClasses(classes: string): void {
+	protected _handleClasses(classes: string | Array<string>): void {
 		let classArray: Array<string>
 
 		if (classes == null) {
 			classArray = []
 		} else {
-			if (~classes.indexOf(' ')) {
-				classArray = classes.split(' ')
+			if (typeof classes === 'string') {
+				if (~classes.indexOf(' ')) {
+					classArray = classes.split(' ')
+				} else {
+					classArray = [classes]
+				}
 			} else {
-				classArray = [classes]
+				classArray = classes
 			}
 		}
+
+		classArray = classArray.filter((value, index, arr) => {
+			return value !== ''
+		})
 
 		this.element.classList.add(...classArray)
 	}
