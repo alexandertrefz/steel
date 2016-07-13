@@ -1,0 +1,7 @@
+{
+	"compilerOptions": {
+		"strictNullChecks": true
+	},
+	"compileOnSave": false,
+	"buildOnSave": false
+}
