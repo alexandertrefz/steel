@@ -8,14 +8,10 @@ export default class Collection<T> extends EventMachine {
 	public count: number
 	private _rangeDifference: Array<T>
 
-	constructor(array: Array<T> = [], cleanUpItems: boolean = false) {
+	constructor(items: Array<T> = []) {
 		super()
 
-		if (cleanUpItems) {
-			array = array.filter((value) => value !== undefined)
-		}
-
-		this.items = array
+		this.items = items
 		this._updateRange()
 	}
 
