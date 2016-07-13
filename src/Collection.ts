@@ -136,13 +136,18 @@ export default class Collection<T> extends EventMachine {
 		return this
 	}
 
-	private _calculateSpliceIndex(from: number, to: number): any { // boolean | number
+	private _calculateSpliceIndex(from: number, to: number): number {
 		// work around TS Compiler here :/
 		let left1: any = to < 0
 		let right1: any = from >= 0
 		let result1: any = !(left1 ^ right1) && (to < 0 || -1)
 
-		return !to || 1 + to - from + (result1 * this.items.length)
+		let result = !to || 1 + to - from + (result1 * this.items.length)
+		if (typeof result === 'boolean') {
+			return 1
+		} else {
+			return result
+		}
 	}
 
 	private _calculateIndex(index: number): number {
