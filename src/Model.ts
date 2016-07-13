@@ -19,6 +19,10 @@ export default class Model extends EventMachine {
 			if (!~propertyFilters.indexOf(key)) {
 				e.cancel()
 			}
+
+			if (value === undefined) {
+				e.cancel()
+			}
 		})
 
 		this._setDefaultData(options)
