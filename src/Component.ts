@@ -86,6 +86,16 @@ export default class Component extends EventMachine {
 		return this
 	}
 
+	public addClasses(classes: Array<string> | string): Component {
+		this.view.addClasses(classes)
+		return this
+	}
+
+	public removeClasses(classes: Array<string> | string): Component {
+		this.view.removeClasses(classes)
+		return this
+	}
+
 	public dispose(): void {
 		// TODO: Dispose View
 		// TODO: Dispose Model
@@ -100,7 +110,5 @@ export default class Component extends EventMachine {
 		}
 
 		this.off()
-
-		return null
 	}
 }

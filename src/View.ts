@@ -75,6 +75,24 @@ export default class View extends EventMachine {
 		return this.element
 	}
 
+	public addClasses(classes: Array<string> | string): View {
+		if (typeof classes === 'string') {
+			classes = classes.trim().split(' ')
+		}
+
+		this.element.classList.add(...classes)
+		return this
+	}
+
+	public removeClasses(classes: Array<string> | string): View {
+		if (typeof classes === 'string') {
+			classes = classes.trim().split(' ')
+		}
+
+		this.element.classList.remove(...classes)
+		return this
+	}
+
 	public getComponentName(): string {
 		return 'GenericView'
 	}
