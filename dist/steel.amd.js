@@ -12,18 +12,16 @@ define(['exports'], function (exports) { 'use strict';
             this._handle = new hook.Handle();
             var commandHandlers = this._getCommandHandlers();
             for (var command in commandHandlers) {
-                this.onCommand(command, this[commandHandlers[command]]);
+                if (commandHandlers.hasOwnProperty(command)) {
+                    this.onCommand(command, this[commandHandlers[command]]);
+                }
             }
         }
         EventMachine._checkEvent = function (event) {
-            var eventObj;
-            if (typeof event === "string" || !(event instanceof hook.Event)) {
-                eventObj = new hook.Event(event);
+            if (typeof event === 'string' || !(event instanceof hook.Event)) {
+                event = new hook.Event(event);
             }
-            else {
-                eventObj = event;
-            }
-            return eventObj;
+            return event;
         };
         EventMachine.prototype._getCommandHandlers = function () {
             return {};
@@ -37,11 +35,11 @@ define(['exports'], function (exports) { 'use strict';
             return this;
         };
         EventMachine.prototype.on = function (event, handler) {
-            var key, value;
-            if (typeof event === "object" && event.eventName == null) {
-                for (key in event) {
-                    value = event[key];
-                    this.on(key, value);
+            if (typeof event === 'object' && !(event instanceof hook.Event)) {
+                for (var key in event) {
+                    if (event.hasOwnProperty(key)) {
+                        this.on(key, event[key]);
+                    }
                 }
                 return this;
             }
@@ -50,12 +48,17 @@ define(['exports'], function (exports) { 'use strict';
             return this;
         };
         EventMachine.prototype.off = function (event, handler) {
-            var eventObj = EventMachine._checkEvent(event);
-            this._handle.removeHandler(eventObj, handler);
+            if (event === undefined) {
+                this._handle.removeHandler();
+            }
+            else {
+                event = EventMachine._checkEvent(event);
+                this._handle.removeHandler(event, handler);
+            }
             return this;
         };
         EventMachine.prototype.sendCommand = function (event, data) {
-            //TODO: Output to console whenever an event gets triggered with no listeners
+            // TODO: Output to console whenever an event gets triggered with no listeners
             var eventObj = EventMachine._checkEvent(event);
             eventObj.eventName = 'command.' + eventObj.eventName;
             this.trigger(eventObj, data);
@@ -63,10 +66,12 @@ define(['exports'], function (exports) { 'use strict';
         };
         EventMachine.prototype.onCommand = function (event, handler) {
             var key, value;
-            if (typeof event === 'object' && event.eventName == null) {
+            if (typeof event === 'object' && !(event instanceof hook.Event)) {
                 for (key in event) {
-                    value = event[key];
-                    this.onCommand(key, value);
+                    if (event.hasOwnProperty(key)) {
+                        value = event[key];
+                        this.onCommand(key, value);
+                    }
                 }
                 return this;
             }
@@ -87,7 +92,7 @@ define(['exports'], function (exports) { 'use strict';
                 data = [];
             }
             capitalizedEventName = eventName[0].toUpperCase() + eventName.slice(1);
-            beforeEvent = new hook.Event("before" + capitalizedEventName);
+            beforeEvent = new hook.Event('before' + capitalizedEventName);
             this.trigger(beforeEvent, data);
             event = Object.assign({}, beforeEvent);
             event.eventName = eventName;
@@ -101,7 +106,7 @@ define(['exports'], function (exports) { 'use strict';
             // event might have been changed by handlers
             if (!event.isCancelled) {
                 afterEvent = Object.assign({}, event);
-                afterEvent.eventName = "after" + capitalizedEventName;
+                afterEvent.eventName = 'after' + capitalizedEventName;
                 this.trigger(afterEvent, afterEvent.data);
             }
             return this;
@@ -116,23 +121,39 @@ define(['exports'], function (exports) { 'use strict';
             _super.call(this);
             this.component = component;
             this._data = {};
+            var propertyFilters = this._getPropertyFilters(options);
+            this.on('beforeSet', function (e, key, value) {
+                if (!~propertyFilters.indexOf(key)) {
+                    e.cancel();
+                }
+                if (value === undefined) {
+                    e.cancel();
+                }
+            });
             this._setDefaultData(options);
             this.initialize(options);
         }
         Model.prototype.initialize = function (options) {
+            // Fix TSLint by providing a comment :)
+        };
+        Model.prototype._getPropertyFilters = function (options) {
+            return [];
         };
         Model.prototype._setDefaultData = function (options) {
+            this.setMany(options);
         };
         Model.prototype.setMany = function (object) {
             for (var key in object) {
-                this.set(key, object[key]);
+                if (object.hasOwnProperty(key)) {
+                    this.set(key, object[key]);
+                }
             }
         };
         Model.prototype._setDefault = function (e, key, value) {
             this._data[key] = value;
         };
         Model.prototype.set = function (key, value) {
-            this.provideHook("set", this._setDefault, [key, value]);
+            this.provideHook('set', this._setDefault, [key, value]);
             return this;
         };
         Model.prototype.get = function (key) {
@@ -144,14 +165,10 @@ define(['exports'], function (exports) { 'use strict';
     // TODO: Implement _rangeDifference for removals
     var Collection = (function (_super) {
         __extends(Collection, _super);
-        function Collection(array, cleanUpItems) {
-            if (array === void 0) { array = []; }
-            if (cleanUpItems === void 0) { cleanUpItems = false; }
+        function Collection(items) {
+            if (items === void 0) { items = []; }
             _super.call(this);
-            if (cleanUpItems) {
-                array = array.filter(function (value) { return value != undefined; });
-            }
-            this.items = array;
+            this.items = items;
             this._updateRange();
         }
         /* Make Collection behave like an array, in ES6 environments
@@ -170,7 +187,7 @@ define(['exports'], function (exports) { 'use strict';
             this._updateRange();
         };
         Collection.prototype.add = function (item) {
-            this.provideHook("add", this._addDefault, [item, this.count]);
+            this.provideHook('add', this._addDefault, [item, this.count]);
             return this;
         };
         Collection.prototype._addRangeDefault = function (event, item, index) {
@@ -185,9 +202,9 @@ define(['exports'], function (exports) { 'use strict';
             for (i = 0; i < items.length; i++) {
                 item = items[i];
                 newIndex = count + i;
-                this.provideHook("add", this._addRangeDefault, [item, newIndex]);
+                this.provideHook('add', this._addRangeDefault, [item, newIndex]);
             }
-            this.trigger("rangeAdded", [this._rangeDifference, count]);
+            this.trigger('rangeAdded', [this._rangeDifference, count]);
             return this;
         };
         Collection.prototype._insertDefault = function (event, item, index) {
@@ -195,7 +212,7 @@ define(['exports'], function (exports) { 'use strict';
             this._updateRange();
         };
         Collection.prototype.insert = function (item, index) {
-            this.provideHook("add", this._insertDefault, [item, index]);
+            this.provideHook('add', this._insertDefault, [item, index]);
             return this;
         };
         Collection.prototype._insertRangeDefault = function (event, item, index) {
@@ -209,23 +226,23 @@ define(['exports'], function (exports) { 'use strict';
             this._rangeDifference = [];
             for (i = 0; i < items.length; i++) {
                 item = items[i];
-                this.provideHook("add", this._insertRangeDefault, [item, index++]);
+                this.provideHook('add', this._insertRangeDefault, [item, index++]);
             }
-            this.trigger("rangeAdded", [this._rangeDifference, initialIndex]);
+            this.trigger('rangeAdded', [this._rangeDifference, initialIndex]);
             return this;
         };
         Collection.prototype._removeDefault = function (event, item, index) {
             this._removeAt(index);
         };
         Collection.prototype.remove = function (item) {
-            this.provideHook("remove", this._removeDefault, [item, this.indexOf(item)]);
+            this.provideHook('remove', this._removeDefault, [item, this.indexOf(item)]);
             return this;
         };
         Collection.prototype._removeAtDefault = function (event, item, index) {
             this._removeAt(index);
         };
         Collection.prototype.removeAt = function (index) {
-            this.provideHook("remove", this._removeAtDefault, [this.items[index], index]);
+            this.provideHook('remove', this._removeAtDefault, [this.items[index], index]);
             return this;
         };
         Collection.prototype._removeRangeDefault = function (event, item, index) {
@@ -243,16 +260,25 @@ define(['exports'], function (exports) { 'use strict';
             }
             for (i = 0; i < elements.length; i++) {
                 item = elements[i];
-                this.provideHook("remove", this._removeRangeDefault, [item, this.indexOf(item)]);
+                this.provideHook('remove', this._removeRangeDefault, [item, this.indexOf(item)]);
             }
             return this;
+        };
+        Collection.prototype.removeAll = function () {
+            return this.removeRange(0, -1);
         };
         Collection.prototype._calculateSpliceIndex = function (from, to) {
             // work around TS Compiler here :/
             var left1 = to < 0;
             var right1 = from >= 0;
             var result1 = !(left1 ^ right1) && (to < 0 || -1);
-            return !to || 1 + to - from + (result1 * this.items.length);
+            var result = !to || 1 + to - from + (result1 * this.items.length);
+            if (typeof result === 'boolean') {
+                return 1;
+            }
+            else {
+                return result;
+            }
         };
         Collection.prototype._calculateIndex = function (index) {
             if (index === 0) {
@@ -277,10 +303,10 @@ define(['exports'], function (exports) { 'use strict';
         };
         Collection.prototype.set = function (index, value) {
             if (index >= this.count) {
-                console.log(new Error("Index is out of range."));
+                console.log(new Error('Index is out of range.'));
                 return false;
             }
-            this.provideHook("set", this._setDefault, [index, value]);
+            this.provideHook('set', this._setDefault, [index, value]);
             return true;
         };
         Collection.prototype.get = function (index) {
@@ -303,34 +329,52 @@ define(['exports'], function (exports) { 'use strict';
             this._handleClasses(options.classes);
             this.childContainer = this._createChildContainer();
             this.components = new Collection();
-            this.components.on('add', function (e, component, index) {
-                _this.element.appendChild(component.view.element);
+            this.components.on('add', function (e, newComponent, index) {
+                _this.element.appendChild(newComponent.view.element);
             });
             this.initialize(options);
             this.render();
         }
         View.prototype._handleClasses = function (classes) {
+            if (classes === void 0) { classes = []; }
             if (typeof classes === 'string') {
-                if (~classes.indexOf(' ')) {
-                    classes = classes.split(' ');
+                if (classes.trim() === '') {
+                    classes = [];
                 }
                 else {
-                    classes = [classes];
+                    classes = classes.trim().split(' ');
                 }
-            }
-            else if (classes == null) {
-                classes = [];
             }
             (_a = this.element.classList).add.apply(_a, classes);
             var _a;
         };
         View.prototype.initialize = function (options) {
+            // Fix TSLint by providing a comment :)
+        };
+        View.prototype._getCommandHandlers = function () {
+            return {};
         };
         View.prototype._createElement = function () {
             return document.createElement('div');
         };
         View.prototype._createChildContainer = function () {
             return this.element;
+        };
+        View.prototype.addClasses = function (classes) {
+            if (typeof classes === 'string') {
+                classes = classes.trim().split(' ');
+            }
+            (_a = this.element.classList).add.apply(_a, classes);
+            return this;
+            var _a;
+        };
+        View.prototype.removeClasses = function (classes) {
+            if (typeof classes === 'string') {
+                classes = classes.trim().split(' ');
+            }
+            (_a = this.element.classList).remove.apply(_a, classes);
+            return this;
+            var _a;
         };
         View.prototype.getComponentName = function () {
             return 'GenericView';
@@ -370,6 +414,7 @@ define(['exports'], function (exports) { 'use strict';
             this.initialize(options);
         }
         Controller.prototype.initialize = function (options) {
+            // Fix TSLint by providing a comment :)
         };
         return Controller;
     }(EventMachine));
@@ -436,6 +481,14 @@ define(['exports'], function (exports) { 'use strict';
             this._isRenderInProgress = false;
             return this;
         };
+        Component.prototype.addClasses = function (classes) {
+            this.view.addClasses(classes);
+            return this;
+        };
+        Component.prototype.removeClasses = function (classes) {
+            this.view.removeClasses(classes);
+            return this;
+        };
         Component.prototype.dispose = function () {
             // TODO: Dispose View
             // TODO: Dispose Model
@@ -449,7 +502,6 @@ define(['exports'], function (exports) { 'use strict';
                 this.parent.children.remove(this);
             }
             this.off();
-            return null;
         };
         return Component;
     }(EventMachine));
@@ -466,5 +518,7 @@ define(['exports'], function (exports) { 'use strict';
     exports.Controller = Controller;
     exports.Component = Component;
     exports.Collection = Collection;
+
+    Object.defineProperty(exports, '__esModule', { value: true });
 
 });
