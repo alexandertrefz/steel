@@ -4,7 +4,8 @@ export default {
 	moduleName: 'steel',
 	plugins: [
 		typescript({
-			target: 'ES6'
+			typescript: require('typescript'),
+			target: 'ES6',
 		})
 	],
 }
