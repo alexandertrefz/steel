@@ -10,28 +10,16 @@ export default class View extends EventMachine {
 	public component: Component
 	public model: Model
 
-	protected _handleClasses(classes: string | Array<string>): void {
-		let classArray: Array<string>
-
-		if (classes == null) {
-			classArray = []
-		} else {
-			if (typeof classes === 'string') {
-				if (~classes.indexOf(' ')) {
-					classArray = classes.split(' ')
-				} else {
-					classArray = [classes]
-				}
+	protected _handleClasses(classes: string | Array<string> = []): void {
+		if (typeof classes === 'string') {
+			if (classes.trim() === '') {
+				classes = []
 			} else {
-				classArray = classes
+				classes = classes.trim().split(' ')
 			}
 		}
 
-		classArray = classArray.filter((value, index, arr) => {
-			return value !== ''
-		})
-
-		this.element.classList.add(...classArray)
+		this.element.classList.add(...classes)
 	}
 
 	constructor(options: any = {}, model: Model, component: Component) {
