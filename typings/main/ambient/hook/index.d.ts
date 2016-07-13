@@ -26,8 +26,8 @@ declare namespace hook {
 		isDefaultPrevented:boolean
 		isCancelled:boolean
 		isPropagationStopped:boolean
-		data:Array<any>
-		constructor(options?:IEventOptions | string)
+		data:any
+		constructor(options?:IEventOptions|string)
 		preventDefault():void
 		cancel():void
 		stopPropagation():void
@@ -50,10 +50,10 @@ declare namespace hook {
 		namespacedHandlers:Array<NamespacedHandler>
 		namespacedEvents:Array<string>
 		constructor()
-		_getEventsArr(event:IEvent):Array<Function>
-		_splitEvent(event:IEvent, origArgs:any, methodName:string):void
+		protected _getEventsArr(event:IEvent):Array<Function>|undefined
+		protected _splitEvent(event:IEvent, origArgs:any, methodName:string):void
 		addHandler(event:IEvent, handler:Function):void
 		removeHandler(event?:IEvent, handler?:Function):void
-		triggerHandlers(obj:any, event:IEvent, data?:any[]):void
+		triggerHandlers(obj:any, event:IEvent, data?:Array<any>):void
 	}
 }
