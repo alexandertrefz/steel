@@ -5,7 +5,7 @@ import View from './View'
 import Controller from './Controller'
 
 export default class Component extends EventMachine {
-	public parent: Component
+	public parent: Component | null
 	public model: Model
 	public view: View
 	public controller: Controller

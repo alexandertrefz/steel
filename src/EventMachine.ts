@@ -1,7 +1,7 @@
 /// <reference path="../typings/main.d.ts" />
 
 export default class EventMachine {
-	public parent: EventMachine
+	public parent: EventMachine | null
 	private _handle: hook.Handle
 
 	private static _checkEvent(event: string | hook.IEvent): hook.Event {
