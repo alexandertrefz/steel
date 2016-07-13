@@ -5,14 +5,11 @@ export default class EventMachine {
 	private _handle: hook.Handle
 
 	private static _checkEvent(event: string | hook.IEvent): hook.Event {
-		let eventObj: hook.Event
 		if (typeof event === 'string' || !(event instanceof hook.Event)) {
-			eventObj = new hook.Event(event)
-		} else {
-			eventObj = event
+			event = new hook.Event(event)
 		}
 
-		return eventObj
+		return event
 	}
 
 	protected _getCommandHandlers(): any {
@@ -41,14 +38,11 @@ export default class EventMachine {
 		return this
 	}
 
-	public on(event: string | hook.Event, handler: (event: hook.IEvent, ...args: Array<any>) => void): EventMachine {
-		let key, value
-
-		if (typeof event === 'object' && event.eventName == null) {
-			for (key in event) {
+	public on(event: string | hook.Event | any, handler: (event: hook.IEvent, ...args: Array<any>) => void): EventMachine {
+		if (typeof event === 'object' && !(event instanceof hook.Event)) {
+			for (let key in event) {
 				if (event.hasOwnProperty(key)) {
-					value = event[key]
-					this.on(key, value)
+					this.on(key, event[key])
 				}
 			}
 
@@ -62,8 +56,12 @@ export default class EventMachine {
 	}
 
 	public off(event?: string | hook.IEvent, handler?: Function): EventMachine {
-		let eventObj = EventMachine._checkEvent(event)
-		this._handle.removeHandler(eventObj, handler)
+		if (event === undefined) {
+			this._handle.removeHandler()
+		} else {
+			event = EventMachine._checkEvent(event)
+			this._handle.removeHandler(event, handler)
+		}
 
 		return this
 	}
@@ -79,7 +77,7 @@ export default class EventMachine {
 	public onCommand(event: string | hook.IEvent, handler: (event: hook.IEvent, ...args: Array<any>) => void): EventMachine {
 		let key, value
 
-		if (typeof event === 'object' && event.eventName == null) {
+		if (typeof event === 'object' && !(event instanceof hook.Event)) {
 			for (key in event) {
 				if (event.hasOwnProperty(key)) {
 					value = event[key]
@@ -117,7 +115,7 @@ export default class EventMachine {
 
 		this.trigger(beforeEvent, data)
 
-		event = Object.assign({}, beforeEvent)
+		event = (Object as any).assign({}, beforeEvent)
 		event.eventName = eventName
 
 		if (!(event.isCancelled || event.isDefaultPrevented)) {
@@ -131,7 +129,7 @@ export default class EventMachine {
 
 		// event might have been changed by handlers
 		if (!event.isCancelled) {
-			afterEvent = Object.assign({}, event)
+			afterEvent = (Object as any).assign({}, event)
 			afterEvent.eventName = 'after' + capitalizedEventName
 			this.trigger(afterEvent, afterEvent.data)
 		}

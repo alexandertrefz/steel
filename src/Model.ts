@@ -4,7 +4,7 @@ import EventMachine from './EventMachine'
 import Component from './Component'
 
 export default class Model extends EventMachine {
-	private _data: any
+	protected _data: any
 	public component: Component
 
 	constructor(options: any = {}, component: Component) {

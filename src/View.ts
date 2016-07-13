@@ -37,7 +37,7 @@ export default class View extends EventMachine {
 	constructor(options: any = {}, model: Model, component: Component) {
 		super()
 
-		options = Object.assign({}, options)
+		options = (Object as any).assign({}, options)
 
 		this.component = component
 
