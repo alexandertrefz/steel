@@ -136,6 +136,10 @@ export default class Collection<T> extends EventMachine {
 		return this
 	}
 
+	public removeAll(): Collection<T> {
+		return this.removeRange(0, -1)
+	}
+
 	private _calculateSpliceIndex(from: number, to: number): number {
 		// work around TS Compiler here :/
 		let left1: any = to < 0
